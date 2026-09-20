@@ -37,10 +37,10 @@ export const getMe = async (): Promise<User> => {
   return response.data;
 };
 
-export const checkSession = async (): Promise<{ success: boolean }> => {
-  const cookieHeader = await getCookieHeader();
+export const checkSession = async (cookieOverride?: string) => {
+  const cookieHeader = cookieOverride ?? (await getCookieHeader());
   const response = await api.get<{ success: boolean }>('/auth/session', {
     headers: { Cookie: cookieHeader },
   });
-  return response.data;
+  return response;
 };
