@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const privateRoutes = ['/notes', '/profile'];
 const publicRoutes = ['/sign-in', '/sign-up'];
@@ -62,8 +63,9 @@ function parseSetCookie(setCookieString: string) {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get('accessToken')?.value;
-  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  const refreshToken = cookieStore.get('refreshToken')?.value;
 
   let isAuthenticated = !!accessToken;
 
@@ -117,7 +119,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isPublicRoute && isAuthenticated) {
-    return applyRefreshedCookies(NextResponse.redirect(new URL('/', request.url)));
+    return applyRefreshedCookies(
+      NextResponse.redirect(new URL('/', request.url))
+    );
   }
 
   return applyRefreshedCookies(NextResponse.next());
